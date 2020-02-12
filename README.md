@@ -8,7 +8,7 @@ Add the following to a `requirements.yml` file:
 
 ```yml
 - src: git+https://github.com/wireapp/ansible-golden_image.git
-  name: ansible-golden_image
+  name: golden_image
   version: v0.1.0
 ```
 
