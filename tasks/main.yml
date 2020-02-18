@@ -27,9 +27,8 @@
 - name: add packages (ubuntu18 only)
   apt: >
     pkg={{ item }}
-    state=absent
-    update_cache=yes
-    purge=yes
+    state=latest
+    install_recommends=no
   with_items:
     - resolvconf
   when: ansible_distribution_version == '18.04'
