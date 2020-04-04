@@ -1,1 +1,1 @@
-golden_image_mount_options: 'defaults,noatime'
+golden_image_mount_options: 'defaults,noatime,nofail'
