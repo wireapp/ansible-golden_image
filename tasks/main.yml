@@ -17,6 +17,16 @@
     - libcap-ng0
   when: ansible_distribution_version == '14.04'
 
+  name: remove packages (ubuntu18 only)
+  apt: >
+    pkg={{ item }}
+    state=absent
+    update_cache=yes
+    purge=yes
+  with_items:
+    - snapd
+  when: ansible_distribution_version == '18.04'
+
 - name: add packages
   apt: >
     pkg={{ item }}
