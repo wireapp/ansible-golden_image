@@ -57,70 +57,48 @@
     mode=0644
     backup=yes
 
-- name: copy ephemeral storage scripts
-  copy: >
-    src={{ item }}
-    dest=/usr/local/bin/{{ item }}
-    owner=root
-    group=root
-    mode=0755
-  with_items:
-    - clown-init-ephemeral
+# while assembling the golden image, cloud-init already runs once,
+# so above cloud.cfg (which disables mount and disk_setup) is only effective
+# for new boots (as in, instances using this golden image)!
+# This means that cloud-init already might have created entries for additional disks we attached.
+# Se we need to remove those from /etc/fstab too
+- name: make sure /mnt is not in /etc/fstab
+  mount:
+    path: /mnt
+    state: "absent"
 
-- name: set mount options (ubuntu 14)
-  set_fact:
-    golden_image_mount_options: 'defaults,nobootwait,noatime'
-  when: ansible_distribution_version == '14.04'
+# We hardcode a LABEL=vol0 /mnt auto … 0 0 to /etc/fstab, with the "nofail".
+# We can't add this to /etc/fstab from the `setup-block-devices` script,
+# as that's already part of the initial transaction
+# The `nofail` is there to still allow booting with no ephemeral disks attached.
+- name: create /mnt entry in /etc/fstab
+  mount:
+    path: /mnt
+    src: LABEL=vol0
+    fstype: xfs
+    opts: defaults,noatime,nofail
+    state: "present"
 
-- name: copy ephemeral storage scripts from template
-  template: >
-    src={{ item }}.j2
-    dest=/usr/local/bin/{{ item }}
-    owner=root
-    group=root
-    mode=0755
-  with_items:
-    - clown-mount-ephemeral
+- name: copy setup-block-devices script
+  copy:
+    src: setup-block-devices
+    dest: /usr/local/bin/setup-block-devices
+    owner: root
+    group: root
+    mode: "0755"
 
-- name: install ephemeral storage upstart jobs
-  copy: >
-    src={{ item }}
-    dest=/etc/init/{{ item }}
-    owner=root
-    group=root
-    mode=0644
-  with_items:
-    - clown-init-ephemeral.conf
-    - clown-mount-ephemeral.conf
-  when: ansible_distribution_version == "14.04"
+- name: copy setup-block-devices.service systemd unit
+  copy:
+    src: setup-block-devices.service
+    dest: /etc/systemd/system/setup-block-devices.service
+    owner: root
+    group: root
+    mode: "0644"
 
-- name: install ephemeral storage systemd unit files
-  copy: >
-    src={{ item }}
-    dest=/lib/systemd/system/{{ item }}
-    owner=root
-    group=root
-    mode=0644
-  with_items:
-    - clown-init-ephemeral.service
-    - clown-mount-ephemeral.service
-  when: ansible_distribution_version != "14.04"
-
-# src and fstype is required but not used by by `absent`
-- name: make sure /mnt and swap is not in /etc/fstab
-  mount: >
-    name={{ item }}
-    src=whatever
-    fstype=whatever
-    state=absent
-  with_items:
-    - /mnt
-    - none
-
-- name: recreate /mnt if it was removed by the previous task
-  file: >
-    path=/mnt
-    state=directory
+- name: Enable the setup-block-devices.service
+  systemd:
+    name: setup-block-devices
+    enabled: yes
 
 - name: install resolv.conf.d/tail
   copy: >
@@ -143,10 +121,3 @@
     value=2048
     sysctl_set=yes
     reload=yes
-
-- name: enable mount
-  shell: 'systemctl enable {{ item }}'
-  with_items:
-    - clown-init-ephemeral
-    - clown-mount-ephemeral
-  when: ansible_distribution_version != "14.04"

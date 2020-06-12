@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 # Partition/stripe and format disks, if any exists.
+# We already have a permissive entry in /etc/fstab
+# taking care of mounting if $VOL_LABEL exists
 
 set -ex
 
-VOL_LABEL=${VOL_LABEL:-vol0}
+VOL_LABEL="vol0"
 
 findfs LABEL=${VOL_LABEL} || {
     instance_disks=(/dev/xvd[bcde])
@@ -22,7 +24,7 @@ findfs LABEL=${VOL_LABEL} || {
         yes | mdadm --create ${EPH_DEV} \
                     --level=0 \
                     --chunk=256 \
-                    --raid-devices=${ndisks} \
+                    --raid-devices="${ndisks}" \
                     ${instance_disks[*]}
     fi
 

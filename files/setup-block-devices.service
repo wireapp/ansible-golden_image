@@ -1,0 +1,13 @@
+[Unit]
+Description=Setup block devices (bare xfs or raid0 with xfs), add to /etc/fstab
+DefaultDependencies=no
+Before=local-fs-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/setup-block-devices
+
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
