@@ -7,7 +7,7 @@
     purge=yes
   with_items: '{{ packages_to_remove }}'
 
-  name: remove packages (ubuntu14 only)
+- name: remove packages (ubuntu14 only)
   apt: >
     pkg={{ item }}
     state=absent
@@ -17,7 +17,7 @@
     - libcap-ng0
   when: ansible_distribution_version == '14.04'
 
-  name: remove packages (ubuntu18 only)
+- name: remove packages (ubuntu18 only)
   apt: >
     pkg={{ item }}
     state=absent
