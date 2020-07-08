@@ -41,6 +41,7 @@
     install_recommends=no
   with_items:
     - resolvconf
+    - runit-systemd
   when: ansible_distribution_version == '18.04'
 
 - name: system apt upgrade
