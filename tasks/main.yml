@@ -1,47 +1,42 @@
 ---
 - name: remove packages
-  apt: >
-    pkg={{ item }}
-    state=absent
-    update_cache=yes
-    purge=yes
-  with_items: '{{ packages_to_remove }}'
+  apt:
+    pkg: '{{ packages_to_remove }}'
+    state: absent
+    update_cache: yes
+    purge: yes
 
 - name: remove packages (ubuntu14 only)
-  apt: >
-    pkg={{ item }}
-    state=absent
-    update_cache=yes
-    purge=yes
-  with_items:
-    - libcap-ng0
+  apt:
+    pkg:
+      - libcap-ng0
+    state: absent
+    update_cache: yes
+    purge: yes
   when: ansible_distribution_version == '14.04'
 
 - name: remove packages (ubuntu18 only)
-  apt: >
-    pkg={{ item }}
-    state=absent
-    update_cache=yes
-    purge=yes
-  with_items:
-    - snapd
+  apt:
+    pkg:
+      - snapd
+    state: absent
+    update_cache: yes
+    purge: yes
   when: ansible_distribution_version == '18.04'
 
 - name: add packages
-  apt: >
-    pkg={{ item }}
-    state=latest
-    install_recommends=no
-  with_items: '{{ packages_to_add }}'
+  apt:
+    pkg: '{{ packages_to_add }}'
+    state: latest
+    install_recommends: false
 
 - name: add packages (ubuntu18 only)
-  apt: >
-    pkg={{ item }}
-    state=latest
-    install_recommends=no
-  with_items:
-    - resolvconf
-    - runit-systemd
+  apt:
+    pkg:
+      - resolvconf
+      - runit-systemd
+    state: latest
+    install_recommends: false
   when: ansible_distribution_version == '18.04'
 
 - name: system apt upgrade
