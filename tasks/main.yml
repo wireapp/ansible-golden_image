@@ -18,6 +18,7 @@
 - name: remove packages (ubuntu18 only)
   apt:
     pkg:
+      - resolvconf
       - snapd
     state: absent
     update_cache: yes
@@ -33,7 +34,6 @@
 - name: add packages (ubuntu18 only)
   apt:
     pkg:
-      - resolvconf
       - runit-systemd
     state: latest
     install_recommends: false
@@ -103,6 +103,11 @@
     backup=yes
   notify:
     - regenerate resolv.conf
+  when: ansible_distribution_version != '18.04'
+
+- name: ensure resolv.conf is /run/systemd/resolve/resolv.conf
+  file: src=/run/systemd/resolve/resolv.conf dest=/etc/resolv.conf state=link
+  when: ansible_distribution_version == '18.04'
 
 - name: set net.core.somaxconn = 2048
   sysctl: >
