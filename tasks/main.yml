@@ -106,7 +106,10 @@
   when: ansible_distribution_version != '18.04'
 
 - name: ensure resolv.conf is /run/systemd/resolve/resolv.conf
-  file: src=/run/systemd/resolve/resolv.conf dest=/etc/resolv.conf state=link
+  file: 
+    src: /run/systemd/resolve/resolv.conf 
+    dest: /etc/resolv.conf 
+    state: link
   when: ansible_distribution_version == '18.04'
 
 - name: set net.core.somaxconn = 2048
