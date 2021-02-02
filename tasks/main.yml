@@ -39,6 +39,7 @@
 - name: add packages (ubuntu18 only)
   apt:
     pkg:
+      - dbus
       - runit-systemd
     state: latest
     install_recommends: false
